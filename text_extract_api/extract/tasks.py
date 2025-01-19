@@ -48,9 +48,9 @@ def ocr_task(
             extracted_text = cached_result.decode('utf-8')
 
     if extracted_text is None:
-        print("Extracting text from PDF...")
+        print("Extracting text from file...")
         self.update_state(state='PROGRESS',
-                          meta={'progress': 30, 'status': 'Extracting text from PDF', 'start_time': start_time,
+                          meta={'progress': 30, 'status': 'Extracting text from file', 'start_time': start_time,
                                 'elapsed_time': time.time() - start_time})  # Example progress update
         extracted_text = strategy.extract_text(FileFormat.from_binary(binary_content), language)
     else:

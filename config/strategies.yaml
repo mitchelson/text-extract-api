@@ -3,3 +3,5 @@ strategies:
       class: text_extract_api.extract.strategies.llama_vision.LlamaVisionStrategy
    easyocr:
       class: text_extract_api.extract.strategies.easyocr.EasyOCRStrategy
+   docling:
+      class: text_extract_api.extract.strategies.docling.DoclingStrategy

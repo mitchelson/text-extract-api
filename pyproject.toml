@@ -40,6 +40,8 @@ dependencies = [
     "numpy",
     "pydantic",
     "python-dotenv",
+    "docling",
+    "docling-parse"
 ]
 [project.optional-dependencies]
 dev = [
