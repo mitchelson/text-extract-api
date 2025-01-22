@@ -23,10 +23,10 @@ def ocr_task(
         filename: str,
         file_hash: str,
         ocr_cache: bool,
-        prompt: str,
-        model: str,
-        language: str,
-        storage_profile: str,
+        prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        language: Optional[str] = None,
+        storage_profile: Optional[str] = None,
         storage_filename: Optional[str] = None,
 ):
     """
@@ -48,11 +48,13 @@ def ocr_task(
             extracted_text = cached_result.decode('utf-8')
 
     if extracted_text is None:
-        print("Extracting text from file...")
+        print(f"Extracting text from file using strategy: {strategy.name()}")
         self.update_state(state='PROGRESS',
                           meta={'progress': 30, 'status': 'Extracting text from file', 'start_time': start_time,
                                 'elapsed_time': time.time() - start_time})  # Example progress update
-        extracted_text = strategy.extract_text(FileFormat.from_binary(binary_content), language)
+        extract_result = strategy.extract_text(FileFormat.from_binary(binary_content), language)
+        extracted_text = extract_result.text
+
     else:
         print("Using cached result...")
 
@@ -62,11 +64,12 @@ def ocr_task(
                             'start_time': start_time,
                             'elapsed_time': time.time() - start_time})  # Example progress update
 
+    # @todo Universal Text Object - is cache available
     if ocr_cache:
         redis_client.set(file_hash, extracted_text)
 
     if prompt:
-        print("Transforming text using LLM (prompt={prompt}, model={model}) ...")
+        print(f"Transforming text using LLM (prompt={prompt}, model={model}) ...")
         self.update_state(state='PROGRESS', meta={'progress': 75, 'status': 'Processing LLM', 'start_time': start_time,
                                                   'elapsed_time': time.time() - start_time})  # Example progress update
         llm_resp = ollama.generate(model, prompt + extracted_text, stream=True)
@@ -82,7 +85,7 @@ def ocr_task(
 
     if storage_profile:
         if not storage_filename:
-            storage_filename = filename.replace('.pdf', '.md')
+            storage_filename = filename.replace('.', '_') + '.pdf'
 
         storage_manager = StorageManager(storage_profile)
         storage_manager.save(filename, storage_filename, extracted_text)

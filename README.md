@@ -8,7 +8,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 
 ## Features:
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -161,6 +161,83 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 ## Join us on Discord
 
 In case of any questions, help requests or just feedback - please [join us on Discord](https://discord.gg/NJzu47Ye3a)!
+
+
+## Text extract stratgies
+
+### `easyocr`
+
+Easy OCR is avaialble on Apache based license. It's general purpose OCR with support for more than 30 langues, probably with the best performance for English.
+
+Enabled by default. Please do use the `strategy=easyocr` CLI and URL parameters to use it.
+
+
+### `minicpm-v` 
+
+MiniCPM-V is Apache based licenseed OCR strategy.
+
+The usage of MiniCPM-o/V model weights must strictly follow [MiniCPM Model License.md](https://github.com/OpenBMB/MiniCPM/blob/main/MiniCPM%20Model%20License.md).
+
+The models and weights of MiniCPM are completely free for academic research. after filling out a ["questionnaire"](https://modelbest.feishu.cn/share/base/form/shrcnpV5ZT9EJ6xYjh3Kx0J6v8g) for registration, are also available for free commercial use.
+
+Enabled by default. Please do use the `strategy=minicpm_v` CLI and URL parameters to use it.
+
+| ⚠️ **Remember to pull the model in Ollama first**       |
+|---------------------------------------------------------|
+| You need to pull the model in Ollama - use the command: |
+| `python client/cli.py llm_pull --model minicpm-v`       |
+| Or, if you have Ollama locally: `ollama pull minicpm-v` |
+
+
+
+### `llama_vision` 
+
+LLama 3.2 Vision Strategy is licensed on [Meta Community License Agreement](https://ollama.com/library/llama3.2-vision/blobs/0b4284c1f870). Works great for many languages, although due to the number of parameters (90b) this model is probably **the slowest** one.
+
+Enabled by default. Please do use the `strategy=llama_vision` CLI and URL parameters to use it. It's by the way the default strategy
+
+
+### `remote`
+
+Some OCR's - like [Marker, state of the art PDF OCR](https://github.com/VikParuchuri/marker) - works really great for more than 50 languages, including great accuracy for Polish and other languages - let's say that are "diffult" to read for standard OCR.
+
+The `marker-pdf` is however licensed on GPL3 license and **therefore it's not included** by default in this application (as we're bound to MIT). 
+
+The weights for the models are licensed cc-by-nc-sa-4.0, but I will waive that for any organization under $5M USD in gross revenue in the most recent 12-month period AND under $5M in lifetime VC/angel funding raised. You also must not be competitive with the Datalab API. If you want to remove the GPL license requirements (dual-license) and/or use the weights commercially over the revenue limit, check out the options here.
+
+To have it up and running you can execute the following steps:
+
+```bash
+mkdir marker-distribution # this should be outside of the `text-extract-api` folder!
+cd marker-distribution
+pip install marker-pdf
+pip install -U uvicorn fastapi python-multipart
+marker_server --port 8002
+```
+
+Set the Remote API Url:
+
+**Note: *** you might run `marker_server` on different port or server - then just make sure you export a proper env setting beffore starting off `text-extract-api` server:
+
+```bash
+export REMOTE_API_URL=http://localhost:8002/marker/upload
+```
+
+**Note: *** the URL might be also set via `/config/strategies.yaml` file
+
+Run the `text-extract-api`:
+
+```bash
+make run
+```
+
+Please do use the `strategy=remote` CLI and URL parameters to use it. For example:
+
+```bash
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=remote" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8000/ocr/upload" 
+```
+
+We are connecting to remote OCR via it's API to not share the same license (GPL3) by having it all linked on the source code level.
 
 ## Getting started with Docker
 
@@ -410,7 +487,7 @@ apiClient.uploadFile(formData).then(response => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF, image or Office file to be processed.
-  - **strategy**: OCR strategy to use (`llama_vision` or `easyocr`).
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -429,7 +506,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`llama_vision` or `easyocr`).
+  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.
@@ -447,7 +524,7 @@ curl -X POST "http://localhost:8000/ocr/request" -H "Content-Type: application/j
   "prompt": "",
   "model": "llama3.1",
   "storage_profile": "default",
-  "storage_filename": "example.pdf"
+  "storage_filename": "example.md"
 }'
 ```
 

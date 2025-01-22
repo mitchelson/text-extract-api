@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Type
+from typing import Callable, Dict, Iterator, Type
 from io import BytesIO
 from PIL import Image
 
@@ -17,6 +17,15 @@ class ImageFileFormat(FileFormat):
     @staticmethod
     def accepted_mime_types() -> list[str]:
         return ["image/jpeg", "image/png", "image/bmp", "image/gif", "image/tiff"]
+    
+    @staticmethod
+    def convertible_to() -> Dict[Type["FileFormat"], Callable[[], Iterator["FileFormat"]]]:
+        from text_extract_api.files.file_formats.pdf import PdfFileFormat
+        from text_extract_api.files.converters.image_to_pdf import ImageToPdfConverter
+
+        return {
+            PdfFileFormat: ImageToPdfConverter.convert
+        }    
 
     @staticmethod
     def is_pageable() -> bool:

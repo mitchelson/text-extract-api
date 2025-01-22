@@ -1,7 +1,18 @@
 strategies:
    llama_vision:
-      class: text_extract_api.extract.strategies.llama_vision.LlamaVisionStrategy
+      class: text_extract_api.extract.strategies.ollama.OllamaStrategy
+      model: llama3.2-vision
+      prompt: You are OCR. Convert image to markdown. Return only the markdown with no explanation text. Do not exclude any content from the page.
+   minicpm_v:
+      class: text_extract_api.extract.strategies.ollama.OllamaStrategy
+      model: minicpm-v
+      prompt: You are OCR. Convert image to markdown. Return only the markdown with no explanation text. Do not exclude any content from the page.
    easyocr:
       class: text_extract_api.extract.strategies.easyocr.EasyOCRStrategy
    docling:
       class: text_extract_api.extract.strategies.docling.DoclingStrategy
+
+   # remote strategy example:
+   #remote:
+   #   class: text_extract_api.extract.strategies.remote.RemoteStrategy
+   #   url:

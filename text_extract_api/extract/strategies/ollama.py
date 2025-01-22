@@ -4,26 +4,27 @@ import time
 
 import ollama
 
+from extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.file_formats.image import ImageFileFormat
 
 
-class LlamaVisionStrategy(Strategy):
-    """Llama 3.2 Vision OCR Strategy"""
+class OllamaStrategy(Strategy):
+    """Ollama models OCR strategy"""
 
     @classmethod
     def name(cls) -> str:
         return "llama_vision"
 
-    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
 
         if (
                 not isinstance(file_format, ImageFileFormat)
                 and not file_format.can_convert_to(ImageFileFormat)
         ):
             raise TypeError(
-                f"Llama Vision - format {file_format.mime_type} is not supported (yet?)"
+                f"Ollama OCR - format {file_format.mime_type} is not supported (yet?)"
             )
 
         images = FileFormat.convert_to(file_format, ImageFileFormat)
@@ -37,11 +38,12 @@ class LlamaVisionStrategy(Strategy):
                 temp_file.write(image.binary)
                 temp_filename = temp_file.name
 
-            # Generate text using the Llama 3.2 Vision model
+            print(self._strategy_config)
+            # Generate text using the specified model
             try:
-                response = ollama.chat("llama3.2-vision", [{
+                response = ollama.chat(self._strategy_config.get('model'), [{
                     'role': 'user',
-                    'content': os.getenv('LLAMA_VISION_PROMPT', "You are OCR. Convert image to markdown."),
+                    'content': self._strategy_config.get('prompt'),
                     'images': [temp_filename]
                 }], stream=True)
                 os.remove(temp_filename)
@@ -62,8 +64,8 @@ class LlamaVisionStrategy(Strategy):
                     20 / num_pages)  # 20% of work is for OCR - just a stupid assumption from tasks.py
             except ollama.ResponseError as e:
                 print('Error:', e.error)
-                raise Exception("Failed to generate text with Llama 3.2 Vision model")
+                raise Exception("Failed to generate text with Ollama model " + self._strategy_config.get('model'))
 
             print(response)
 
-        return extracted_text
+        return ExtractResult.from_text(extracted_text)

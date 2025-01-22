@@ -3,6 +3,13 @@ SHELL := /bin/bash
 export DISABLE_VENV ?= 0
 export DISABLE_LOCAL_OLLAMA ?= 0
 
+define load_env
+	@if [ -f $(1) ]; then \
+		echo "Loading environment from $(1)"; \
+		set -o allexport; source $(1); set +o allexport; \
+	fi
+endef
+
 .PHONY: help
 help:
 	@echo "Available commands:"
@@ -81,6 +88,7 @@ install-requirements:
 
 .PHONY: run
 run:
+	@$(call load_env,.env.localhost)
 	@echo "Starting the local application server..."; \
 	DISABLE_VENV=$(DISABLE_VENV) DISABLE_LOCAL_OLLAMA=$(DISABLE_LOCAL_OLLAMA) ./run.sh
 

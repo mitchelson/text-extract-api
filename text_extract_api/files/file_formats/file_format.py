@@ -68,7 +68,6 @@ class FileFormat:
         mime_type = mime_type or FileFormat._guess_mime_type(binary_data=binary, filename=filename)
         from text_extract_api.files.file_formats.pdf import PdfFileFormat  # type: ignore
         file_format_class = cls._get_file_format_class(mime_type)
-        print(file_format_class)
         return file_format_class(binary_file_content=binary, filename=filename, mime_type=mime_type)
 
     def __repr__(self) -> str:

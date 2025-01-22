@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import easyocr
 
+from extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats.file_format import FileFormat
 from text_extract_api.files.file_formats.image import ImageFileFormat
@@ -13,7 +14,7 @@ class EasyOCRStrategy(Strategy):
     def name(cls) -> str:
         return "easyOCR"
 
-    def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
         """
         Extract text using EasyOCR after converting the input file to images
         (if not already an ImageFileFormat). 
@@ -53,4 +54,6 @@ class EasyOCRStrategy(Strategy):
 
         # Join text from all images/pages
         full_text = "\n\n".join(all_extracted_text)
-        return full_text
+
+
+        return ExtractResult.from_text(full_text)

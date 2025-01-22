@@ -58,11 +58,12 @@ async def ocr_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    filename = storage_filename if storage_filename else file.filename
     file_binary = await file.read()
-    file_format = FileFormat.from_binary(file_binary)
+    file_format = FileFormat.from_binary(file_binary, filename, file.content_type)
 
     print(
-        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}")
+        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}, will be saved as: {filename}")
 
     # Asynchronous processing using Celery
     task = ocr_task.apply_async(
@@ -77,7 +78,7 @@ async def ocr_endpoint(
 async def ocr_upload_endpoint(
         strategy: str = Form(...),
         prompt: str = Form(None),
-        model: str = Form(...),
+        model: str = Form(None),
         file: UploadFile = File(...),
         ocr_cache: bool = Form(...),
         storage_profile: str = Form('default'),
@@ -103,7 +104,7 @@ class OllamaPullRequest(BaseModel):
 class OcrRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
-    model: str = Field(..., description="Model to use for the Ollama endpoint")
+    model: Optional[str] = Field(None, description="Model to use for the Ollama endpoint")
     file: FileField = Field(..., description="Base64 encoded document file")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
@@ -125,7 +126,7 @@ class OcrRequest(BaseModel):
 class OcrFormRequest(BaseModel):
     strategy: str = Field(..., description="OCR strategy to use")
     prompt: Optional[str] = Field(None, description="Prompt for the Ollama model")
-    model: str = Field(..., description="Model to use for the Ollama endpoint")
+    model: Optional[str] = Field(None, description="Model to use for the Ollama endpoint")
     ocr_cache: bool = Field(..., description="Enable OCR result caching")
     storage_profile: Optional[str] = Field('default', description="Storage profile to use")
     storage_filename: Optional[str] = Field(None, description="Storage filename to use")
@@ -153,7 +154,7 @@ async def ocr_request_endpoint(request: OcrRequest):
     request_data = request.model_dump()
     try:
         OcrRequest(**request_data)
-        file = FileFormat.from_base64(request.file)
+        file = FileFormat.from_base64(request.file, request.storage_filename)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
