@@ -1,54 +1,65 @@
+from text_extract_api.extract.extract_result import ExtractResult
+from text_extract_api.extract.strategies.strategy import Strategy
+from text_extract_api.files.file_formats import FileFormat, PdfFileFormat
+from docling import DoclingDocument  # Assuming a compatible Docling library or module
 import tempfile
 
-from typing import Optional
-from docling_core.types.doc.document import DoclingDocument
-
-from docling_parse.docling_parse import pdf_parser_v2
-
-from text_extract_api.extract.strategies.strategy import Strategy
-from text_extract_api.files.file_formats.file_format import FileFormat
-
 class DoclingStrategy(Strategy):
+    """
+    Extraction strategy for processing PDF documents using Docling.
+    """
 
-    def __init__(self):
-        super().__init__()
-        self._document: Optional[DoclingDocument] = None
-        self._current_file_format: Optional[FileFormat] = None
-        self._parser = pdf_parser_v2("error")  # @todo move it to construct
+    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
+        """
+        Extracts text from a PDF file using Docling and returns an ExtractResult.
 
+        :param file_format: Instance of FileFormat (only supports PdfFileFormat).
+        :param language: Language of the text (default is 'en').
+        :return: ExtractResult containing the extracted DoclingDocument and metadata.
+        """
+        if not isinstance(file_format, PdfFileFormat):
+            raise ValueError("DoclingStrategy only supports PdfFileFormat.")
 
-    @property
-    def document(self) -> Optional[DoclingDocument]:
-        """Access the current DoclingDocument instance"""
-        return self._document
+        # Save file content to a temporary file
+        temp_file_path = self._save_to_temp_file(file_format)
 
-    @classmethod
-    def name(cls) -> str:
-        return "docling"
+        # Convert the document using Docling
+        docling_document = self._convert_to_docling(temp_file_path)
 
-def extract_text(self, file_format: FileFormat, language: str = 'en') -> str:
+        print(docling_document)
+        # Return the result wrapped in ExtractResult
+        return ExtractResult(value=docling_document, text_gatherer=self.text_gatherer)
 
+    def text_gatherer(self, docling_document: DoclingDocument) -> str:
+        """
+        Gathers text content from a DoclingDocument in markdown format.
 
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
-        temp_file.write(image.binary)
-        temp_filename = temp_file.name
+        :param docling_document: Instance of DoclingDocument.
+        :return: Text content in markdown format.
+        """
+        return docling_document.to_markdown()
 
-        doc_file = temp_filename
-        doc_key = f"key={file_format.filename}"
+    def _convert_to_docling(self, file_path: str) -> DoclingDocument:
+        """
+        Converts a PDF file into a DoclingDocument instance.
 
-    success = self._parser.load_document(doc_key, doc_file)
+        :param file_path: Path to the PDF file to be converted.
+        :return: DoclingDocument instance.
+        """
+        # Placeholder for actual conversion logic using the Docling API
+        try:
+            docling_document = DoclingDocument.from_file(file_path)
+            return docling_document
+        except Exception as e:
+            raise RuntimeError(f"Failed to convert document using Docling: {e}")
 
-    num_pages = self._parser.number_of_pages(doc_key)
+    def _save_to_temp_file(self, file_format: FileFormat) -> str:
+        """
+        Saves the content of a FileFormat instance to a temporary file.
 
-    for page in range(0, num_pages):
-
-        json_doc = self._parser.parse_pdf_from_key_on_page(doc_key, page)
-
-        if "pages" not in json_doc:
-            continue
-
-        json_page = json_doc["pages"][0]
-        print(json_page)
-
-
-    self._parser.unload_document(doc_key)
+        :param file_format: Instance of FileFormat.
+        :return: Path to the temporary file containing the file content.
+        """
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            temp_file.write(file_format.get_content())  # Assuming get_content provides binary content
+            return temp_file.name
