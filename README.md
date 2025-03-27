@@ -12,7 +12,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
-- **Distributed queue processing** using [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html))
+- **Distributed queue processing** using [Celery](https://docs.celeryq.dev/en/stable/getting-started/introduction.html)
 - **Caching** using Redis - the OCR results can be easily cached prior to LLM processing,
 - **Storage Strategies** switchable storage strategies (Google Drive, Local File System ...)
 - **CLI tool** for sending tasks and processing results 
@@ -163,22 +163,22 @@ python client/cli.py ocr_upload --file examples/example-mri.pdf --ocr_cache --pr
 In case of any questions, help requests or just feedback - please [join us on Discord](https://discord.gg/NJzu47Ye3a)!
 
 
-## Text extract stratgies
+## Text extract strategies
 
 ### `easyocr`
 
-Easy OCR is avaialble on Apache based license. It's general purpose OCR with support for more than 30 langues, probably with the best performance for English.
+Easy OCR is available on Apache based license. It's general purpose OCR with support for more than 30 languages, probably with the best performance for English.
 
 Enabled by default. Please do use the `strategy=easyocr` CLI and URL parameters to use it.
 
 
 ### `minicpm-v` 
 
-MiniCPM-V is Apache based licenseed OCR strategy.
+MiniCPM-V is an Apache based licensed OCR strategy.
 
 The usage of MiniCPM-o/V model weights must strictly follow [MiniCPM Model License.md](https://github.com/OpenBMB/MiniCPM/blob/main/MiniCPM%20Model%20License.md).
 
-The models and weights of MiniCPM are completely free for academic research. after filling out a ["questionnaire"](https://modelbest.feishu.cn/share/base/form/shrcnpV5ZT9EJ6xYjh3Kx0J6v8g) for registration, are also available for free commercial use.
+The models and weights of MiniCPM are completely free for academic research. After filling out a ["questionnaire"](https://modelbest.feishu.cn/share/base/form/shrcnpV5ZT9EJ6xYjh3Kx0J6v8g) for registration, are also available for free commercial use.
 
 Enabled by default. Please do use the `strategy=minicpm_v` CLI and URL parameters to use it.
 
@@ -254,7 +254,7 @@ cd text-extract-api
 ```
 
 ### Using `Makefile`
-You can use the `make install` and `make run` command to setup the Docker environment for `text-extract-api`. You can find the manual steps required to do so described below.
+You can use the `make install` and `make run` commands to set up the Docker environment for `text-extract-api`. You can find the manual steps required to do so described below.
 
 
 ### Manual setup
@@ -286,9 +286,9 @@ OCR_URL=http://localhost:8000/ocr/upload
 OCR_UPLOAD_URL=http://localhost:8000/ocr/upload
 OCR_REQUEST_URL=http://localhost:8000/ocr/request
 RESULT_URL=http://localhost:8000/ocr/result/
-CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cach
+CLEAR_CACHE_URL=http://localhost:8000/ocr/clear_cache
 LLM_PULL_API_URL=http://localhost:8000/llm_pull
-LLM_GENEREATE_API_URL=http://localhost:8000/llm_generate
+LLM_GENERATE_API_URL=http://localhost:8000/llm_generate
 
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
@@ -297,7 +297,7 @@ APP_ENV=development  # Default to development mode
 ```
 
 
-**Note:** In order to properly save the output files you might need to modify `storage_profiles/default.yaml` to change the default storage path according to the volumes path defined in the `docker-compose.yml`
+**Note:** In order to properly save the output files, you might need to modify `storage_profiles/default.yaml` to change the default storage path according to the volumes path defined in the `docker-compose.yml`
 
 ### Build and Run the Docker Containers
 
@@ -338,7 +338,7 @@ pip install -e . # install main project requirements
 ```
 
 
-The project includes a CLI for interacting with the API. To make it work first run:
+The project includes a CLI for interacting with the API. To make it work, first run:
 
 ```bash
 cd client
@@ -377,7 +377,7 @@ The difference is just that the first call uses `ocr/upload` - multipart form da
 
 **Important note:** To use LLM you must first run the **llm_pull** to get the specific model required by your requests.
 
-For example you must run:
+For example, you must run:
 
 ```bash
 python client/cli.py llm_pull --model llama3.1
@@ -453,7 +453,7 @@ python llm_generate --prompt "Your prompt here"
 
 ## API Clients
 
-You might want to use the decdicated API clients to use `text-extract-api`
+You might want to use the dedicated API clients to use `text-extract-api`.
 
 ### Typescript
 
@@ -472,7 +472,7 @@ const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 formData.append('prompt', 'Convert file to JSON and return only JSON'); // if not provided, no LLM transformation will gonna happen - just the OCR
 formData.append('strategy', 'llama_vision');
-formData.append('model', 'llama3.1')
+formData.append('model', 'llama3.1');
 formData.append('ocr_cache', 'true');
 
 apiClient.uploadFile(formData).then(response => {
