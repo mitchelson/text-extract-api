@@ -1,8 +1,9 @@
 from text_extract_api.extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats import FileFormat, PdfFileFormat
-from docling import DoclingDocument  # Assuming a compatible Docling library or module
+from docling_core.types.doc.document import DoclingDocument  # Assuming a compatible Docling library or module
 import tempfile
+
 
 class DoclingStrategy(Strategy):
     """
