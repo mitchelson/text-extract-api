@@ -1,19 +1,26 @@
+import tempfile
+
+from docling.document_converter import DocumentConverter
+from docling_core.types.doc.document import (  # Assuming a compatible Docling library or module
+    DoclingDocument,
+)
+
 from text_extract_api.extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats import FileFormat, PdfFileFormat
-from docling_core.types.doc.document import DoclingDocument  # Assuming a compatible Docling library or module
-from docling.document_converter import DocumentConverter
-import tempfile
+
 
 class DoclingStrategy(Strategy):
     """
     Extraction strategy for processing PDF documents using Docling.
     """
 
-    def name(self) -> str:        
+    def name(self) -> str:
         return "docling"
 
-    def extract_text(self, file_format: FileFormat, language: str = 'en') -> ExtractResult:
+    def extract_text(
+        self, file_format: FileFormat, language: str = "en"
+    ) -> ExtractResult:
         """
         Extracts text from a PDF file using Docling and returns an ExtractResult.
 
@@ -62,6 +69,6 @@ class DoclingStrategy(Strategy):
         :param file_format: Instance of FileFormat.
         :return: Path to the temporary file containing the file content.
         """
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(file_format.binary)
             return temp_file.name
