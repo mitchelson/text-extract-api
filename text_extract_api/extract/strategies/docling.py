@@ -9,7 +9,6 @@ from text_extract_api.extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
 from text_extract_api.files.file_formats import FileFormat, PdfFileFormat
 
-
 class DoclingStrategy(Strategy):
     """
     Extraction strategy for processing PDF documents using Docling.
