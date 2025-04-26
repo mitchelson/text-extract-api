@@ -21,9 +21,9 @@ class DoclingStrategy(Strategy):
         self, file_format: FileFormat, language: str = "en"
     ) -> ExtractResult:
         """
-        Extracts text from a PDF file using Docling and returns an ExtractResult.
+        Extracts text from a file using Docling and returns an ExtractResult.
 
-        :param file_format: Instance of FileFormat (only supports PdfFileFormat).
+        :param file_format: Instance of FileFormat (which supports most docling formats).
         :param language: Language of the text (default is 'en').
         :return: ExtractResult containing the extracted DoclingDocument and metadata.
         """
