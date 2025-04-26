@@ -40,7 +40,7 @@ class OllamaStrategy(Strategy):
 
             # Generate text using the specified model
             try:
-                timeout = httpx.Timeout(connect=180.0, read=180.0, write=180.0, pool=180.0)
+                timeout = httpx.Timeout(connect=180.0, read=180.0, write=180.0, pool=180.0) # @todo move those values to .env
                 ollama = Client(timeout=timeout)
                 response = ollama.chat(self._strategy_config.get('model'), [{
                     'role': 'user',
