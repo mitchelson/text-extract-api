@@ -48,7 +48,7 @@ class DoclingStrategy(Strategy):
 
     def _convert_to_docling(self, file_path: str) -> DoclingDocument:
         """
-        Converts a PDF file into a DoclingDocument instance.
+        Converts a file into a DoclingDocument instance.
 
         :param file_path: Path to the PDF file to be converted.
         :return: DoclingDocument instance.

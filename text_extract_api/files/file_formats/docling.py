@@ -9,11 +9,11 @@ class DoclingFileFormat(FileFormat):
     @staticmethod
     def accepted_mime_types() -> list[str]:
         return [
-            "application/pdf",  # PDF documents
             "application/vnd.docling",  # Docling documents
+            # Do not put all formats handled by docling here - only those that are not supported by dedicated file formats"
             "text/plain",
             "text/markdown",
-            "text/html",  # HTML documents
+            "text/html",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             "application/vnd.oasis.opendocument.text",
@@ -21,8 +21,6 @@ class DoclingFileFormat(FileFormat):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/vnd.ms-powerpoint",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "image/jpeg",
-            "image/png",
             "text/csv",
             "application/json",
             "application/xml",

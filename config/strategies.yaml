@@ -11,8 +11,8 @@ strategies:
       class: text_extract_api.extract.strategies.easyocr.EasyOCRStrategy
    docling:
       class: text_extract_api.extract.strategies.docling.DoclingStrategy
-
-   # remote strategy example:
-   #remote:
-   #   class: text_extract_api.extract.strategies.remote.RemoteStrategy
-   #   url:
+      model: llama3.1
+      prompt: You are OCR. Convert image to markdown. Return only the markdown with no explanation text. Do not exclude any content from the page.
+   remote:
+      class: text_extract_api.extract.strategies.remote.RemoteStrategy
+      url:
