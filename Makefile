@@ -31,7 +31,7 @@ install:
 	printf "%s\n" "$$padding"; \
 	printf "\e[1;34m   Do you want to run the application locally or with Docker?\e[0m\n"; \
 	printf "\e[1;33m   [L] \e[0m Local - Run the application locally\n"; \
-	printf "\e[1;33m   [D] \e[0m Docker - Run the axpplication in Docker\n"; \
+	printf "\e[1;33m   [D] \e[0m Docker - Run the application in Docker\n"; \
 	read -p "   > " choice; \
 	case "$$choice" in \
 		[lL]) echo -e "\033[1;32m   ✔ You chose: Local Setup\033[0m"; $(MAKE) setup-local ;; \
@@ -47,38 +47,46 @@ setup-local:
 	  	cp .env.localhost.example .env.localhost; \
 	fi
 	@while true; do \
-		printf  "\n\e[1;34m   Python setup environment...\e[0m"; \
+		printf  "\n\e[1;34m   Python setup environment \e[0m"; \
 		printf "\e[1;34m\n   Do you want to install requirements?\e[0m\n"; \
-		printf "\e[1;33m   [y] \e[0m Yes - Install and then run application locally\n"; \
-		printf "\e[1;33m   [n] \e[0m No  - Skip and run application locally \n"; \
-	read -p "   > " choice; \
-		case "$$choice" in \
-			[yY]) \
-				echo -e "\033[1;32m   ✔ Installing Python dependencies...\033[0m"; \
-				$(MAKE) install-requirements; \
-				$(MAKE) run; \
-				break; \
-				;; \
-			[nN]|[sS]) \
-				echo -e "\033[1;33m   Skipping requirement installation. Starting the local server instead...\033[0m"; \
-				$(MAKE) run; \
-				break; \
-				;; \
-			*) \
-				echo -e "\033[1;31m   Invalid input: Please enter 'y', 'n', or 's' to proceed.\033[0m"; \
-				;; \
-		esac; \
+		printf "\e[1;33m   [Y] \e[0m Yes - Install and then run application locally\n"; \
+		printf "\e[1;33m   [N] \e[0m No  - Skip and run application locally \n"; \
+		read -p "   > " choice; \
+			case "$$choice" in \
+				[yY]) \
+					echo -e "\033[1;32m   ✔ Installing Python dependencies...\033[0m"; \
+					$(MAKE) install-requirements; \
+					$(MAKE) run; \
+					break; \
+					;; \
+				[nN]|[sS]) \
+					echo -e "\033[1;32m   ✔ Skipping requirement installation. Starting the local server instead...\033[0m"; \
+					$(MAKE) run; \
+					break; \
+					;; \
+				*) \
+					echo -e "\033[1;31m   Invalid input: Please enter 'y', 'n', or 's' to proceed.\033[0m"; \
+					;; \
+			esac; \
 	done
 
 .PHONY: install-linux
 install-linux:
-	@echo -e "\033[1;34m   Installing Linux dependencies...\033[0m"; \
+	@echo -e "\033[1;32m   ✔ Installing Linux dependencies...\033[0m"; \
 	sudo apt update && sudo apt install -y libmagic1 poppler-utils pkg-config
 
 .PHONY: install-macos
 install-macos:
-	@echo -e "\033[1;34m   Installing macOS dependencies...\033[0m"; \
-	brew update && brew install libmagic poppler pkg-config ghostscript ffmpeg automake autoconf
+	@commandToRun="brew update && brew install libmagic poppler pkg-config ghostscript ffmpeg automake autoconf"; \
+	printf "\e[1;34m\n   The installer will execute the following command:\n      > $$commandToRun\033[0m\n"; \
+	printf "   Press \e[1;33m[ANY KEY]\e[0m to proceed with the installation, or \e[1;33m[N]\e[0m to skip (ensure these dependencies are installed manually):\n"; \
+	read -p "   > " choice; \
+	if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
+		sh -c "$$commandToRun"; \
+		echo -e "\033[1;32m   ✔ macOS dependencies installed successfully.\033[0m"; \
+	else \
+		echo -e "\033[2m   ➖ macOS dependency installation skipped.\033[0m"; \
+	fi
 
 .PHONY: install-requirements
 install-requirements:
@@ -89,7 +97,7 @@ install-requirements:
 .PHONY: run
 run:
 	@$(call load_env,.env.localhost)
-	@echo "Starting the local application server..."; \
+	@printf "\033[1;32m   ✔ Starting the local application server...\033[0m"; \
 	DISABLE_VENV=$(DISABLE_VENV) DISABLE_LOCAL_OLLAMA=$(DISABLE_LOCAL_OLLAMA) ./run.sh
 
 .PHONY: setup-docker
@@ -111,17 +119,17 @@ setup-docker:
 
 .PHONY: run-docker
 run-docker:
-	@echo -e "\033[1;34m   Starting Docker container with CPU support...\033[0m";
+	@echo -e "\033[1;32m   ✔ Starting Docker container with CPU support...\033[0m";
 	@docker-compose -f docker-compose.yml up --build
 
 .PHONY: run-docker-gpu
 run-docker-gpu:
-	@echo -e "\033[1;34m   Starting Docker container with GPU support...\033[0m";
+	@echo -e "\033[1;32m   ✔ Starting Docker container with GPU support...\033[0m";
 	@docker-compose -f docker-compose.gpu.yml -p text-extract-api-gpu up --build
 
 .PHONY: clean
 clean:
-	@echo "Cleaning project..."; \
+	@echo "\033[1;32m   ✔ Cleaning project...\033[0m"; \
 	docker-compose down -v; \
 	$(MAKE) clear-cache
 

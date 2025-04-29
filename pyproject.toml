@@ -28,6 +28,7 @@ dependencies = [
     "google-auth-httplib2",
     "google-auth-oauthlib",
     "transformers",
+    "accelerate",
     "boto3",
     "Pillow",
     "python-magic==0.4.27",
@@ -40,6 +41,8 @@ dependencies = [
     "numpy",
     "pydantic",
     "python-dotenv",
+    "docling",
+    "docling-parse"
 ]
 [project.optional-dependencies]
 dev = [

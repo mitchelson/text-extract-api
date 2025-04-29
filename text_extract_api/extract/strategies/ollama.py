@@ -2,7 +2,8 @@ import os
 import tempfile
 import time
 
-import ollama
+import httpx
+from ollama import Client
 
 from extract.extract_result import ExtractResult
 from text_extract_api.extract.strategies.strategy import Strategy
@@ -26,7 +27,6 @@ class OllamaStrategy(Strategy):
             raise TypeError(
                 f"Ollama OCR - format {file_format.mime_type} is not supported (yet?)"
             )
-
         images = FileFormat.convert_to(file_format, ImageFileFormat)
         extracted_text = ""
         start_time = time.time()
@@ -38,9 +38,10 @@ class OllamaStrategy(Strategy):
                 temp_file.write(image.binary)
                 temp_filename = temp_file.name
 
-            print(self._strategy_config)
             # Generate text using the specified model
             try:
+                timeout = httpx.Timeout(connect=180.0, read=180.0, write=180.0, pool=180.0) # @todo move those values to .env
+                ollama = Client(timeout=timeout)
                 response = ollama.chat(self._strategy_config.get('model'), [{
                     'role': 'user',
                     'content': self._strategy_config.get('prompt'),

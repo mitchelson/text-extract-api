@@ -19,7 +19,6 @@ from text_extract_api.files.storage_manager import StorageManager
 # Define base path as text_extract_api - required for keeping absolute namespaces
 sys.path.insert(0, str(pathlib.Path(__file__).parent.resolve()))
 
-
 def storage_profile_exists(profile_name: str) -> bool:
     profile_path = os.path.abspath(
         os.path.join(os.getenv('STORAGE_PROFILE_PATH', './storage_profiles'), f'{profile_name}.yaml'))
@@ -29,12 +28,10 @@ def storage_profile_exists(profile_name: str) -> bool:
         return os.path.isfile(sub_profile_path)
     return True
 
-
 app = FastAPI()
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
-
 
 @app.post("/ocr")
 async def ocr_endpoint(
