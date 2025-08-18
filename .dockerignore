@@ -7,7 +7,6 @@ examples/
 screenshots/
 
 # Scripts and local storage
-scripts/
 storage/
 
 # Python cache files
