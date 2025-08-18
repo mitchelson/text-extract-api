@@ -7,7 +7,7 @@ import math
 from ollama import pull
 
 def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None, language='en'):
-    ocr_url = os.getenv('OCR_UPLOAD_URL', 'http://localhost:8000/ocr/upload')
+    ocr_url = os.getenv('OCR_UPLOAD_URL', 'http://localhost:8080/ocr/upload')
     files = {'file': open(file_path, 'rb')}
     if not ocr_cache:
         print("OCR cache disabled.")
@@ -45,7 +45,7 @@ def ocr_upload(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1',
         return None
 
 def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1', strategy='llama_vision', storage_profile='default', storage_filename=None, language='en'):
-    ocr_url = os.getenv('OCR_REQUEST_URL', 'http://localhost:8000/ocr/request')
+    ocr_url = os.getenv('OCR_REQUEST_URL', 'http://localhost:8080/ocr/request')
     with open(file_path, 'rb') as f:
         file_content = base64.b64encode(f.read()).decode('utf-8')
     
@@ -88,7 +88,7 @@ def ocr_request(file_path, ocr_cache, prompt, prompt_file=None, model='llama3.1'
 
 def get_result(task_id, print_progress = False):
     extracted_text_printed_once = False
-    result_url = os.getenv('RESULT_URL', f'http://localhost:8000/ocr/result/')
+    result_url = os.getenv('RESULT_URL', f'http://localhost:8080/ocr/result/')
     while True:
         response = requests.get(result_url + task_id)
         result = response.json()
@@ -112,7 +112,7 @@ def get_result(task_id, print_progress = False):
         time.sleep(2)  # Wait for 2 seconds before checking again
 
 def clear_cache():
-    clear_cache_url = os.getenv('CLEAR_CACHE_URL', 'http://localhost:8000/ocr/clear_cache')
+    clear_cache_url = os.getenv('CLEAR_CACHE_URL', 'http://localhost:8080/ocr/clear_cache')
     response = requests.post(clear_cache_url)
     if response.status_code == 200:
         print("OCR cache cleared successfully.")
@@ -128,7 +128,7 @@ def llm_pull(model = 'llama3.1'):
         print(f'Pulling {model} - {chunk.status}')    
 
 def llm_generate(prompt, model = 'llama3.1'):
-    ollama_url = os.getenv('LLM_GENERATE_API_URL', 'http://localhost:8000/llm/generate')
+    ollama_url = os.getenv('LLM_GENERATE_API_URL', 'http://localhost:8080/llm/generate')
     response = requests.post(ollama_url, json={"model": model, "prompt": prompt})
     if response.status_code == 200:
         print(response.json().get('generated_text'))
@@ -136,7 +136,7 @@ def llm_generate(prompt, model = 'llama3.1'):
         print(f"Failed to generate text: {response.text}")
 
 def list_files(storage_profile):
-    list_files_url = os.getenv('LIST_FILES_URL', 'http://localhost:8000/storage/list')
+    list_files_url = os.getenv('LIST_FILES_URL', 'http://localhost:8080/storage/list')
     response = requests.get(list_files_url, params={'storage_profile': storage_profile})
     if response.status_code == 200:
         files = response.json().get('files', [])
@@ -146,7 +146,7 @@ def list_files(storage_profile):
         print(f"Failed to list files: {response.text}")        
 
 def load_file(file_name, storage_profile):
-    load_file_url = os.getenv('LOAD_FILE_URL', 'http://localhost:8000/storage/load')
+    load_file_url = os.getenv('LOAD_FILE_URL', 'http://localhost:8080/storage/load')
     response = requests.get(load_file_url, params={'file_name': file_name, 'storage_profile': storage_profile})
     if response.status_code == 200:
         content = response.json().get('content', '')
@@ -155,7 +155,7 @@ def load_file(file_name, storage_profile):
         print(f"Failed to load file: {response.text}")
 
 def delete_file(file_name, storage_profile):
-    delete_file_url = os.getenv('DELETE_FILE_URL', 'http://localhost:8000/storage/delete')
+    delete_file_url = os.getenv('DELETE_FILE_URL', 'http://localhost:8080/storage/delete')
     response = requests.delete(delete_file_url, params={'file_name': file_name, 'storage_profile': storage_profile})
     if response.status_code == 200:
         print(f"File {file_name} deleted successfully.")

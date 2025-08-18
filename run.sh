@@ -78,12 +78,12 @@ fi
 echo "Starting Celery Worker and FastAPI server"
 if [ $APP_ENV = 'production' ]; then
     celery -A text_extract_api.celery_init worker --loglevel=info --pool=solo & # to scale by concurrent processing please run this line as many times as many concurrent processess you want to have running; keep in mind that after next run they will be killed
-    uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000;
+    uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8080;
 else
 
   trap 'kill $(jobs -p) && exit' SIGINT SIGTERM
   (
       "$CELERY_BIN" -A text_extract_api.celery_app worker --loglevel=debug --pool=solo &
-      uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8000 --reload
+      uvicorn text_extract_api.main:app --host 0.0.0.0 --port 8080 --reload
   )
 fi
