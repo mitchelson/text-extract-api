@@ -6,9 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "text_extract_api"
 version = "0.2.0"
 description = "Images and documents (PDF, Word, PPTX ...) extraction and parse API using state of the art modern OCRs + Ollama supported models. Anonymize documents. Remove PII. Convert any document or picture to structured JSON or Markdown"
-authors = [
-]
-license = { text = "MIT License" }
+authors = ["Mitch S <mitchelsonps@gmail.com>"]
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
@@ -33,8 +32,6 @@ dependencies = [
     "Pillow",
     "python-magic==0.4.27",
     "marker",
-    "maker",
-    "setuptools",
     "PyYAML",
     "botocore",
     "protobuf",

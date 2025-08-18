@@ -18,6 +18,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
 
 WORKDIR /app
 
-EXPOSE 8000
+EXPOSE 8080
 
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]
