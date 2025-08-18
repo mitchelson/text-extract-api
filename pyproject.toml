@@ -32,6 +32,7 @@ dependencies = [
     "boto3",
     "Pillow",
     "python-magic==0.4.27",
+    "marker",
     "maker",
     "setuptools",
     "PyYAML",
