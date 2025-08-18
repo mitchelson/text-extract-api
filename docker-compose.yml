@@ -5,7 +5,7 @@ services:
       dockerfile: dev.Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     ports:
-      - "8000:8000"
+      - "8080:8000"
     environment:
       - APP_TYPE=fastapi
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
@@ -13,8 +13,8 @@ services:
       - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:8000/llm_pull}
       - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:8000/llm_generate}
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
-      - APP_ENV=${APP_ENV-development}  # Default to development mode
-      - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles}  # Add the storage profile path
+      - APP_ENV=${APP_ENV-development} # Default to development mode
+      - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles} # Add the storage profile path
       - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:8000/storage/list}
       - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:8000/storage/load}
       - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:8000/storage/delete}
@@ -23,7 +23,7 @@ services:
       - redis
       - ollama
     volumes: &appvolumes
-      - .:/app  # Mount the text_extract_api directory to enable auto-reloading
+      - .:/app # Mount the text_extract_api directory to enable auto-reloading
 
   celery_worker:
     build:
@@ -35,8 +35,8 @@ services:
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
-      - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles}  # Add the storage profile path
-      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:8000/storage/list}      
+      - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles} # Add the storage profile path
+      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:8000/storage/list}
       - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:8000/storage/load}
       - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:8000/storage/delete}
     depends_on:
@@ -55,10 +55,9 @@ services:
     tty: true
     restart: always
     ports:
-      - "11434:11434"  # Expose Ollama's API port, changing internal to external port
+      - "11434:11434" # Expose Ollama's API port, changing internal to external port
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/"]  # Assumes health endpoint exists
+      test: ["CMD", "curl", "-f", "http://localhost:11434/"] # Assumes health endpoint exists
       interval: 30s
       timeout: 10s
       retries: 3
-
