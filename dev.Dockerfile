@@ -16,7 +16,17 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* \
         libpoppler-cpp-dev \
     && rm -rf /var/lib/apt/lists/*
 
+
 WORKDIR /app
+
+# Copia todos os arquivos do projeto para o container
+COPY . /app
+
+# Instala as dependências Python
+RUN python -m venv .dvenv && \
+    . .dvenv/bin/activate && \
+    pip install --upgrade pip setuptools && \
+    pip install .
 
 EXPOSE 8080
 

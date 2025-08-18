@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "wheel", "cython"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "text_extract_api"
 version = "0.2.0"
 description = "Images and documents (PDF, Word, PPTX ...) extraction and parse API using state of the art modern OCRs + Ollama supported models. Anonymize documents. Remove PII. Convert any document or picture to structured JSON or Markdown"
-authors = ["Mitch S <mitchelsonps@gmail.com>"]
+authors = [{name = "Mitch", email = "mitchelsonps@gmail.com"}]
 license = "MIT"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -31,7 +31,6 @@ dependencies = [
     "boto3",
     "Pillow",
     "python-magic==0.4.27",
-    "marker",
     "PyYAML",
     "botocore",
     "protobuf",
