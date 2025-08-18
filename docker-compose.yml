@@ -2,7 +2,7 @@ services:
   fastapi_app:
     build:
       context: . # Keep the build context as the root directory
-      dockerfile: dev.Dockerfile
+      dockerfile: Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     ports:
       - "8080:8000"
