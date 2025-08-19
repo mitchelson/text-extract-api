@@ -5,7 +5,12 @@ import importlib
 import pkgutil
 from typing import Type, Dict
 
-from pydantic.v1.typing import get_class
+
+# Utilitário para importar classe por string
+def get_class(class_path: str):
+    module_path, class_name = class_path.rsplit('.', 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, class_name)
 
 from extract.extract_result import ExtractResult
 from text_extract_api.files.file_formats.file_format import FileFormat
