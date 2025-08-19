@@ -8,8 +8,8 @@ services:
       - "2323:2323"
     environment:
       - APP_TYPE=fastapi
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
-      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
       - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:2323/llm_pull}
       - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:2323/llm_generate}
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
@@ -33,8 +33,8 @@ services:
     environment:
       - APP_TYPE=celery
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
-      - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
-      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
+      - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:${REDIS_PASSWORD}@redis:6379/0
       - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles} # Add the storage profile path
       - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:2323/storage/list}
       - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:2323/storage/load}
@@ -46,6 +46,7 @@ services:
 
   redis:
     image: redis:7.2.4-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     ports:
       - "${REDIS_HOST_PORT:-6379}:6379"
 

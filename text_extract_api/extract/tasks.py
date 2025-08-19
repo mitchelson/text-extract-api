@@ -89,6 +89,9 @@ def ocr_task(
 
         storage_manager = StorageManager(storage_profile)
         storage_manager.save(filename, storage_filename, extracted_text)
+        # Apaga o arquivo original após salvar o texto extraído
+        if storage_profile == 'default':
+            storage_manager.delete(filename)
 
     self.update_state(state='DONE', meta={'progress': 100, 'status': 'Processing done!', 'start_time': start_time,
                                           'elapsed_time': time.time() - start_time})
