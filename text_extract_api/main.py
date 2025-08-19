@@ -67,8 +67,7 @@ async def ocr_sync_endpoint(
 
     # Salva no storage se necessário
     if storage_profile:
-        ext = os.path.splitext(filename)[1]
-        storage_filename_final = storage_filename or (filename.replace('.', '_') + ext if ext else filename.replace('.', '_'))
+        storage_filename_final = storage_filename if storage_filename else filename
         storage_manager = StorageManager(storage_profile)
         print(f"[LOG] Salvando resultado no storage: {storage_profile}, arquivo: {storage_filename_final}")
         storage_manager.save(filename, storage_filename_final, extracted_text)
