@@ -99,4 +99,21 @@ def ocr_task(
     self.update_state(state='DONE', meta={'progress': 100, 'status': 'Processing done!', 'start_time': start_time,
                                           'elapsed_time': time.time() - start_time})
 
+    # Chama o webhook ao finalizar o processamento
+    try:
+        import requests
+        webhook_url = "https://n8n.tanapromo.app/webhook/ocr-complete"
+        payload = {
+            "filename": filename,
+            "file_hash": file_hash,
+            "status": "done",
+            "extracted_text": extracted_text,
+            "storage_profile": storage_profile,
+            "storage_filename": storage_filename,
+            "timestamp": time.time()
+        }
+        requests.post(webhook_url, json=payload, timeout=10)
+    except Exception as e:
+        print(f"Falha ao chamar webhook: {e}")
+
     return extracted_text
