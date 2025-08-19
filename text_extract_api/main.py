@@ -29,6 +29,49 @@ def storage_profile_exists(profile_name: str) -> bool:
     return True
 
 app = FastAPI()
+
+# Nova rota síncrona: /ocr/sync
+@app.post("/ocr/sync")
+async def ocr_sync_endpoint(
+        strategy: str = Form(...),
+        prompt: str = Form(None),
+        model: str = Form(...),
+        file: UploadFile = File(...),
+        ocr_cache: bool = Form(...),
+        storage_profile: str = Form('default'),
+        storage_filename: str = Form(None),
+        language: str = Form('en')
+):
+    """
+    Endpoint síncrono para extrair texto de um arquivo PDF, Imagem ou Office usando diferentes estratégias de OCR.
+    Retorna os dados extraídos e apaga o arquivo após o processamento.
+    """
+    try:
+        OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache,
+                       storage_profile=storage_profile, storage_filename=storage_filename, language=language)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    filename = storage_filename if storage_filename else file.filename
+    file_binary = await file.read()
+    file_format = FileFormat.from_binary(file_binary, filename, file.content_type)
+
+    # Executa extração de texto diretamente (sem Celery)
+    strategy_obj = Strategy.get_strategy(strategy)
+    extract_result = strategy_obj.extract_text(file_format, language)
+    extracted_text = extract_result.text
+
+    # Salva no storage se necessário
+    if storage_profile:
+        ext = os.path.splitext(filename)[1]
+        storage_filename_final = storage_filename or (filename.replace('.', '_') + ext if ext else filename.replace('.', '_'))
+        storage_manager = StorageManager(storage_profile)
+        storage_manager.save(filename, storage_filename_final, extracted_text)
+        if storage_profile == 'default':
+            storage_manager.delete(filename)
+
+    return {"extracted_text": extracted_text, "filename": filename, "storage_filename": storage_filename_final}
+
 # Novo endpoint: /ocr/structure
 @app.post("/ocr/structure")
 async def ocr_structure_endpoint(

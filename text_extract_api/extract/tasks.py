@@ -85,7 +85,12 @@ def ocr_task(
 
     if storage_profile:
         if not storage_filename:
-            storage_filename = filename.replace('.', '_') + '.pdf'
+            # Detecta a extensão original do arquivo
+            ext = os.path.splitext(filename)[1]
+            if ext:
+                storage_filename = filename.replace('.', '_') + ext
+            else:
+                storage_filename = filename.replace('.', '_')
 
         storage_manager = StorageManager(storage_profile)
         storage_manager.save(filename, storage_filename, extracted_text)
