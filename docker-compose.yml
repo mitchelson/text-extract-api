@@ -5,19 +5,19 @@ services:
       dockerfile: dev.Dockerfile
     entrypoint: /app/scripts/entrypoint.sh
     ports:
-      - "8080:8080"
+      - "2323:2323"
     environment:
       - APP_TYPE=fastapi
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
-      - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:8080/llm_pull}
-      - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:8080/llm_generate}
+      - LLM_PULL_API_URL=${LLM_PULL_API_URL-http://web:2323/llm_pull}
+      - LLM_GENEREATE_API_URL=${LLM_GENEREATE_API_URL-http://web:2323/llm_generate}
       - OLLAMA_HOST=${OLLAMA_HOST-http://ollama:11434}
       - APP_ENV=${APP_ENV-development} # Default to development mode
       - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles} # Add the storage profile path
-      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:8080/storage/list}
-      - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:8080/storage/load}
-      - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:8080/storage/delete}
+      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:2323/storage/list}
+      - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:2323/storage/load}
+      - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:2323/storage/delete}
       - REMOTE_API_URL=${REMOTE_API_URL}
     depends_on:
       - redis
@@ -36,9 +36,9 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL-redis://redis:6379/0}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND-redis://redis:6379/0}
       - STORAGE_PROFILE_PATH=${STORAGE_PROFILE_PATH-/app/storage_profiles} # Add the storage profile path
-      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:8080/storage/list}
-      - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:8080/storage/load}
-      - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:8080/storage/delete}
+      - LIST_FILES_URL=${LIST_FILES_URL-http://localhost:2323/storage/list}
+      - LOAD_FILE_URL=${LOAD_FILE_URL-http://localhost:2323/storage/load}
+      - DELETE_FILE_URL=${DELETE_FILE_URL-http://localhost:2323/storage/delete}
     depends_on:
       - redis
       - fastapi_app

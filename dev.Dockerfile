@@ -28,6 +28,6 @@ RUN python -m venv .dvenv && \
     pip install --upgrade pip setuptools && \
     pip install .
 
-EXPOSE 8080
+EXPOSE 2323
 
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]

@@ -233,7 +233,7 @@ make run
 Please do use the `strategy=remote` CLI and URL parameters to use it. For example:
 
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=remote" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8080/ocr/upload"
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=remote" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:2323/ocr/upload"
 ```
 
 We are connecting to remote OCR via it's API to not share the same license (GPL3) by having it all linked on the source code level.
@@ -281,13 +281,13 @@ STORAGE_PROFILE_PATH=./storage_profiles
 LLAMA_VISION_PROMPT="You are OCR. Convert image to markdown."
 
 # CLI settings
-OCR_URL=http://localhost:8080/ocr/upload
-OCR_UPLOAD_URL=http://localhost:8080/ocr/upload
-OCR_REQUEST_URL=http://localhost:8080/ocr/request
-RESULT_URL=http://localhost:8080/ocr/result/
-CLEAR_CACHE_URL=http://localhost:8080/ocr/clear_cache
-LLM_PULL_API_URL=http://localhost:8080/llm_pull
-LLM_GENERATE_API_URL=http://localhost:8080/llm_generate
+OCR_URL=http://localhost:2323/ocr/upload
+OCR_UPLOAD_URL=http://localhost:2323/ocr/upload
+OCR_REQUEST_URL=http://localhost:2323/ocr/request
+RESULT_URL=http://localhost:2323/ocr/result/
+CLEAR_CACHE_URL=http://localhost:2323/ocr/clear_cache
+LLM_PULL_API_URL=http://localhost:2323/llm_pull
+LLM_GENERATE_API_URL=http://localhost:2323/llm_generate
 
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
@@ -497,7 +497,7 @@ apiClient.uploadFile(formData).then((response) => {
 Example:
 
 ```bash
-curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=easyocr" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:8080/ocr/upload"
+curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-mri.pdf" -F "strategy=easyocr" -F "ocr_cache=true" -F "prompt=" -F "model=" "http://localhost:2323/ocr/upload"
 ```
 
 ### OCR Endpoint via JSON request
@@ -517,7 +517,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 Example:
 
 ```bash
-curl -X POST "http://localhost:8080/ocr/request" -H "Content-Type: application/json" -d '{
+curl -X POST "http://localhost:2323/ocr/request" -H "Content-Type: application/json" -d '{
   "file": "<base64-encoded-file-content>",
   "strategy": "easyocr",
   "ocr_cache": true,
@@ -538,7 +538,7 @@ curl -X POST "http://localhost:8080/ocr/request" -H "Content-Type: application/j
 Example:
 
 ```bash
-curl -X GET "http://localhost:8080/ocr/result/{task_id}"
+curl -X GET "http://localhost:2323/ocr/result/{task_id}"
 ```
 
 ### Clear OCR Cache Endpoint
@@ -549,7 +549,7 @@ curl -X GET "http://localhost:8080/ocr/result/{task_id}"
 Example:
 
 ```bash
-curl -X POST "http://localhost:8080/ocr/clear_cache"
+curl -X POST "http://localhost:2323/ocr/clear_cache"
 ```
 
 ### Ollama Pull Endpoint
@@ -562,7 +562,7 @@ curl -X POST "http://localhost:8080/ocr/clear_cache"
 Example:
 
 ```bash
-curl -X POST "http://localhost:8080/llm/pull" -H "Content-Type: application/json" -d '{"model": "llama3.1"}'
+curl -X POST "http://localhost:2323/llm/pull" -H "Content-Type: application/json" -d '{"model": "llama3.1"}'
 ```
 
 ### Ollama Endpoint
@@ -576,7 +576,7 @@ curl -X POST "http://localhost:8080/llm/pull" -H "Content-Type: application/json
 Example:
 
 ```bash
-curl -X POST "http://localhost:8080/llm/generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
+curl -X POST "http://localhost:2323/llm/generate" -H "Content-Type: application/json" -d '{"prompt": "Your prompt here", "model":"llama3.1"}'
 ```
 
 ### List storage files:
