@@ -9,7 +9,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 ## Features:
 
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), [minicpm-v](https://github.com/OpenBMB/MiniCPM-o?tab=readme-ov-file#minicpm-v-26), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -173,22 +173,6 @@ In case of any questions, help requests or just feedback - please [join us on Di
 Easy OCR is available on Apache based license. It's general purpose OCR with support for more than 30 languages, probably with the best performance for English.
 
 Enabled by default. Please do use the `strategy=easyocr` CLI and URL parameters to use it.
-
-### `minicpm-v`
-
-MiniCPM-V is an Apache based licensed OCR strategy.
-
-The usage of MiniCPM-o/V model weights must strictly follow [MiniCPM Model License.md](https://github.com/OpenBMB/MiniCPM/blob/main/MiniCPM%20Model%20License.md).
-
-The models and weights of MiniCPM are completely free for academic research. After filling out a ["questionnaire"](https://modelbest.feishu.cn/share/base/form/shrcnpV5ZT9EJ6xYjh3Kx0J6v8g) for registration, are also available for free commercial use.
-
-Enabled by default. Please do use the `strategy=minicpm_v` CLI and URL parameters to use it.
-
-| ⚠️ **Remember to pull the model in Ollama first**       |
-| ------------------------------------------------------- |
-| You need to pull the model in Ollama - use the command: |
-| `python client/cli.py llm_pull --model minicpm-v`       |
-| Or, if you have Ollama locally: `ollama pull minicpm-v` |
 
 ### `llama_vision`
 
@@ -486,7 +470,7 @@ apiClient.uploadFile(formData).then((response) => {
 - **Method**: POST
 - **Parameters**:
   - **file**: PDF, image or Office file to be processed.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
+  - **strategy**: OCR strategy to use (`llama_vision`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result
   - **model**: When provided along with the prompt - this model will be used for LLM processing
@@ -506,7 +490,7 @@ curl -X POST -H "Content-Type: multipart/form-data" -F "file=@examples/example-m
 - **Method**: POST
 - **Parameters** (JSON body):
   - **file**: Base64 encoded PDF file content.
-  - **strategy**: OCR strategy to use (`llama_vision`, `minicpm_v`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
+  - **strategy**: OCR strategy to use (`llama_vision`, `remote` or `easyocr`). See the [available strategies](#text-extract-stratgies)
   - **ocr_cache**: Whether to cache the OCR result (true or false).
   - **prompt**: When provided, will be used for Ollama processing the OCR result.
   - **model**: When provided along with the prompt - this model will be used for LLM processing.

@@ -88,7 +88,6 @@ async def ocr_structure_endpoint(
     import tempfile
     import requests
     # 1. Extrair texto via OCR
-    from text_extract_api.extract.strategies import easyocr, minicpm_v
     from text_extract_api.files.file_formats.image import ImageFileFormat
     # Salvar imagem temporária
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
@@ -99,8 +98,6 @@ async def ocr_structure_endpoint(
     image_format = ImageFileFormat.from_file(temp_filename)
     if ocr_strategy == 'easyocr':
         ocr_strategy_obj = easyocr.EasyOCRStrategy({})
-    elif ocr_strategy == 'minicpm_v':
-        ocr_strategy_obj = minicpm_v.MiniCPMVStrategy({})
     else:
         os.remove(temp_filename)
         raise HTTPException(status_code=400, detail="Estratégia de OCR não suportada")
