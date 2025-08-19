@@ -101,7 +101,7 @@ Produtos já cadastrados:
 
     return {"structured_data": structured_data, "raw_text": extracted_text, "produtos": produtos}
 # Connect to Redis
-redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
+redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6380/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
 
 @app.post("/ocr")
