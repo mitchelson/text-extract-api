@@ -51,14 +51,11 @@ services:
       - "${REDIS_HOST_PORT:-6379}:6379"
 
   ollama:
-    image: ollama/ollama # Use the official Ollama image
-    pull_policy: always
-    tty: true
-    restart: always
+    image: ollama/ollama
     ports:
-      - "11434:11434" # Expose Ollama's API port, changing internal to external port
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/"] # Assumes health endpoint exists
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  ollama-data:

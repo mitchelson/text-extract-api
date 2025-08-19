@@ -29,6 +29,77 @@ def storage_profile_exists(profile_name: str) -> bool:
     return True
 
 app = FastAPI()
+# Novo endpoint: /ocr/structure
+@app.post("/ocr/structure")
+async def ocr_structure_endpoint(
+    file: UploadFile = File(...),
+    prompt: str = Form(...),
+    products_api_url: str = Form(...),
+    ocr_strategy: str = Form('easyocr'),
+    language: str = Form('pt'),
+    model: str = Form('llama3.1')
+):
+    """
+    Extrai texto da imagem, consulta produtos via API externa e estrutura os dados com Ollama.
+    """
+    import tempfile
+    import requests
+    # 1. Extrair texto via OCR
+    from text_extract_api.extract.strategies import easyocr, minicpm_v
+    from text_extract_api.files.file_formats.image import ImageFileFormat
+    # Salvar imagem temporária
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as temp_file:
+        temp_file.write(await file.read())
+        temp_filename = temp_file.name
+
+    # Criar FileFormat para OCR
+    image_format = ImageFileFormat.from_file(temp_filename)
+    if ocr_strategy == 'easyocr':
+        ocr_strategy_obj = easyocr.EasyOCRStrategy({})
+    elif ocr_strategy == 'minicpm_v':
+        ocr_strategy_obj = minicpm_v.MiniCPMVStrategy({})
+    else:
+        os.remove(temp_filename)
+        raise HTTPException(status_code=400, detail="Estratégia de OCR não suportada")
+
+    extract_result = ocr_strategy_obj.extract_text(image_format, language=language)
+    extracted_text = extract_result.text
+
+    # 2. Consultar produtos via API externa
+    try:
+        response = requests.get(products_api_url)
+        response.raise_for_status()
+        produtos = response.json()
+    except Exception as e:
+        os.remove(temp_filename)
+        raise HTTPException(status_code=500, detail=f"Erro ao consultar produtos: {str(e)}")
+
+    # 3. Montar prompt para o Ollama
+    ollama_prompt = f"""
+{prompt}
+
+Texto extraído:
+{extracted_text}
+
+Produtos já cadastrados:
+{produtos}
+"""
+
+    # 4. Chamar Ollama para estruturar os dados
+    import ollama
+    ollama_host = os.environ.get("OLLAMA_HOST", "http://ollama:11434")
+    client = ollama.Client(host=ollama_host)
+    try:
+        response = client.generate(model, ollama_prompt)
+        structured_data = response.get("response", "")
+    except Exception as e:
+        os.remove(temp_filename)
+        raise HTTPException(status_code=500, detail=f"Erro ao estruturar dados com Ollama: {str(e)}")
+
+    # 5. Limpar arquivo temporário
+    os.remove(temp_filename)
+
+    return {"structured_data": structured_data, "raw_text": extracted_text, "produtos": produtos}
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1')
 redis_client = redis.StrictRedis.from_url(redis_url)
