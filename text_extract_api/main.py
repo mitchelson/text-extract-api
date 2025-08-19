@@ -107,7 +107,7 @@ async def ocr_structure_endpoint(
         image_bytes = f.read()
     image_format = ImageFileFormat.from_binary(image_bytes, temp_filename, "image/jpeg")
     if ocr_strategy == 'easyocr':
-        ocr_strategy_obj = EasyOCRStrategy({})
+        ocr_strategy_obj = EasyOCRStrategy()
     else:
         print(f"[LOG] Estratégia de OCR não suportada: {ocr_strategy}")
         os.remove(temp_filename)

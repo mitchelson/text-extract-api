@@ -72,7 +72,8 @@ def ocr_task(
         print(f"Transforming text using LLM (prompt={prompt}, model={model}) ...")
         self.update_state(state='PROGRESS', meta={'progress': 75, 'status': 'Processing LLM', 'start_time': start_time,
                                                   'elapsed_time': time.time() - start_time})  # Example progress update
-        llm_resp = ollama.generate(model, prompt + extracted_text, stream=True)
+        model_final = model if model is not None else "llama3.1"
+        llm_resp = ollama.generate(model_final, prompt + extracted_text, stream=True)
         num_chunk = 1
         extracted_text = ''  # will be filled with chunks from llm
         for chunk in llm_resp:
