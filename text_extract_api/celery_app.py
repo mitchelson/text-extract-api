@@ -1,5 +1,6 @@
 import pathlib
 import sys
+import os
 
 from celery import Celery
 from dotenv import load_dotenv
@@ -14,8 +15,8 @@ multiprocessing.set_start_method("spawn", force=True)
 
 app = Celery(
     "text_extract_api",
-    broker="redis://redis:6379/0",
-    backend="redis://redis:6379/0"
+    broker=os.environ.get("CELERY_BROKER_URL"),
+    backend=os.environ.get("CELERY_RESULT_BACKEND")
 )
 app.config_from_object({
     "worker_max_memory_per_child": 8200000
