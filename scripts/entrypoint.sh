@@ -23,7 +23,6 @@ if [ "$APP_TYPE" = "celery" ]; then
 else
    echo "Pulling LLM models, please wait until this process is done..."
    python client/cli.py llm_pull --model llama3.1
-   python client/cli.py llm_pull --model llama3.2-vision
    echo "LLM models are ready!"
 
    echo "Starting FastAPI app..."

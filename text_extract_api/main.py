@@ -28,6 +28,7 @@ def storage_profile_exists(profile_name: str) -> bool:
         return os.path.isfile(sub_profile_path)
     return True
 
+from text_extract_api.extract.strategies.easyocr import EasyOCRStrategy
 app = FastAPI()
 
 # Nova rota síncrona: /ocr/sync
@@ -46,10 +47,12 @@ async def ocr_sync_endpoint(
     Endpoint síncrono para extrair texto de um arquivo PDF, Imagem ou Office usando diferentes estratégias de OCR.
     Retorna os dados extraídos e apaga o arquivo após o processamento.
     """
+    print(f"[LOG] Iniciando /ocr/sync | strategy={strategy}, model={model}, ocr_cache={ocr_cache}, storage_profile={storage_profile}, storage_filename={storage_filename}, language={language}, file={file.filename}")
     try:
         OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache,
                        storage_profile=storage_profile, storage_filename=storage_filename, language=language)
     except ValueError as e:
+        print(f"[LOG] Erro de validação em /ocr/sync: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
     filename = storage_filename if storage_filename else file.filename
@@ -58,6 +61,7 @@ async def ocr_sync_endpoint(
 
     # Executa extração de texto diretamente (sem Celery)
     strategy_obj = Strategy.get_strategy(strategy)
+    print(f"[LOG] Executando extração de texto com a estratégia: {strategy}")
     extract_result = strategy_obj.extract_text(file_format, language)
     extracted_text = extract_result.text
 
@@ -66,10 +70,13 @@ async def ocr_sync_endpoint(
         ext = os.path.splitext(filename)[1]
         storage_filename_final = storage_filename or (filename.replace('.', '_') + ext if ext else filename.replace('.', '_'))
         storage_manager = StorageManager(storage_profile)
+        print(f"[LOG] Salvando resultado no storage: {storage_profile}, arquivo: {storage_filename_final}")
         storage_manager.save(filename, storage_filename_final, extracted_text)
         if storage_profile == 'default':
+            print(f"[LOG] Apagando arquivo original do storage default: {filename}")
             storage_manager.delete(filename)
 
+    print(f"[LOG] Finalizado /ocr/sync | filename={filename}, storage_filename={storage_filename_final}")
     return {"extracted_text": extracted_text, "filename": filename, "storage_filename": storage_filename_final}
 
 # Novo endpoint: /ocr/structure
@@ -85,6 +92,7 @@ async def ocr_structure_endpoint(
     """
     Extrai texto da imagem, consulta produtos via API externa e estrutura os dados com Ollama.
     """
+    print(f"[LOG] Iniciando /ocr/structure | ocr_strategy={ocr_strategy}, language={language}, model={model}, file={file.filename}")
     import tempfile
     import requests
     # 1. Extrair texto via OCR
@@ -95,22 +103,28 @@ async def ocr_structure_endpoint(
         temp_filename = temp_file.name
 
     # Criar FileFormat para OCR
-    image_format = ImageFileFormat.from_file(temp_filename)
+    with open(temp_filename, "rb") as f:
+        image_bytes = f.read()
+    image_format = ImageFileFormat.from_binary(image_bytes, temp_filename, "image/jpeg")
     if ocr_strategy == 'easyocr':
-        ocr_strategy_obj = easyocr.EasyOCRStrategy({})
+        ocr_strategy_obj = EasyOCRStrategy({})
     else:
+        print(f"[LOG] Estratégia de OCR não suportada: {ocr_strategy}")
         os.remove(temp_filename)
         raise HTTPException(status_code=400, detail="Estratégia de OCR não suportada")
 
+    print(f"[LOG] Executando extração de texto com a estratégia: {ocr_strategy}")
     extract_result = ocr_strategy_obj.extract_text(image_format, language=language)
     extracted_text = extract_result.text
 
     # 2. Consultar produtos via API externa
     try:
+        print(f"[LOG] Consultando produtos na API externa: {products_api_url}")
         response = requests.get(products_api_url)
         response.raise_for_status()
         produtos = response.json()
     except Exception as e:
+        print(f"[LOG] Erro ao consultar produtos: {e}")
         os.remove(temp_filename)
         raise HTTPException(status_code=500, detail=f"Erro ao consultar produtos: {str(e)}")
 
@@ -130,15 +144,18 @@ Produtos já cadastrados:
     ollama_host = os.environ.get("OLLAMA_HOST", "http://ollama:11434")
     client = ollama.Client(host=ollama_host)
     try:
+        print(f"[LOG] Gerando dados estruturados com Ollama | model={model}")
         response = client.generate(model, ollama_prompt)
         structured_data = response.get("response", "")
     except Exception as e:
+        print(f"[LOG] Erro ao estruturar dados com Ollama: {e}")
         os.remove(temp_filename)
         raise HTTPException(status_code=500, detail=f"Erro ao estruturar dados com Ollama: {str(e)}")
 
     # 5. Limpar arquivo temporário
     os.remove(temp_filename)
 
+    print(f"[LOG] Finalizado /ocr/structure | structured_data={structured_data[:100]}")
     return {"structured_data": structured_data, "raw_text": extracted_text, "produtos": produtos}
 # Connect to Redis
 redis_url = os.getenv('REDIS_CACHE_URL', 'redis://redis:6380/1')
@@ -160,24 +177,27 @@ async def ocr_endpoint(
     Supports both synchronous and asynchronous processing.
     """
     # Validate input
+    print(f"[LOG] Iniciando /ocr | strategy={strategy}, model={model}, ocr_cache={ocr_cache}, storage_profile={storage_profile}, storage_filename={storage_filename}, language={language}, file={file.filename}")
     try:
         OcrFormRequest(strategy=strategy, prompt=prompt, model=model, ocr_cache=ocr_cache,
                        storage_profile=storage_profile, storage_filename=storage_filename, language=language)
     except ValueError as e:
+        print(f"[LOG] Erro de validação em /ocr: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
     filename = storage_filename if storage_filename else file.filename
     file_binary = await file.read()
     file_format = FileFormat.from_binary(file_binary, filename, file.content_type)
 
-    print(
-        f"Processing Document {file_format.filename} with strategy: {strategy}, ocr_cache: {ocr_cache}, model: {model}, storage_profile: {storage_profile}, storage_filename: {storage_filename}, language: {language}, will be saved as: {filename}")
+    print(f"[LOG] Processando documento {file_format.filename} com strategy={strategy}, ocr_cache={ocr_cache}, model={model}, storage_profile={storage_profile}, storage_filename={storage_filename}, language={language}, filename final={filename}")
 
     # Asynchronous processing using Celery
+    print(f"[LOG] Enviando tarefa para Celery...")
     task = ocr_task.apply_async(
         args=[file_format.binary, strategy, file_format.filename, file_format.hash, ocr_cache, prompt, model, language,
               storage_profile,
               storage_filename])
+    print(f"[LOG] Tarefa enviada para Celery | task_id={task.id}")
     return {"task_id": task.id}
 
 
@@ -197,6 +217,7 @@ async def ocr_upload_endpoint(
     Alias endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
+    print(f"[LOG] Iniciando /ocr/upload | strategy={strategy}, model={model}, ocr_cache={ocr_cache}, storage_profile={storage_profile}, storage_filename={storage_filename}, language={language}, file={file.filename}")
     return await ocr_endpoint(strategy, prompt, model, file, ocr_cache, storage_profile, storage_filename, language)
 
 
@@ -258,21 +279,24 @@ async def ocr_request_endpoint(request: OcrRequest):
     Endpoint to extract text from an uploaded PDF/Office/Image file using different OCR strategies.
     Supports both synchronous and asynchronous processing.
     """
+    print(f"[LOG] Iniciando /ocr/request | strategy={request.strategy}, model={request.model}, ocr_cache={request.ocr_cache}, storage_profile={request.storage_profile}, storage_filename={request.storage_filename}, language={request.language}")
     # Validate input
     request_data = request.model_dump()
     try:
         OcrRequest(**request_data)
         file = FileFormat.from_base64(request.file, request.storage_filename)
     except ValueError as e:
+        print(f"[LOG] Erro de validação em /ocr/request: {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
-    print(
-        f"Processing {file.mime_type} with strategy: {request.strategy}, ocr_cache: {request.ocr_cache}, model: {request.model}, storage_profile: {request.storage_profile}, storage_filename: {request.storage_filename}, language: {request.language}")
+    print(f"[LOG] Processando arquivo {file.mime_type} com strategy={request.strategy}, ocr_cache={request.ocr_cache}, model={request.model}, storage_profile={request.storage_profile}, storage_filename={request.storage_filename}, language={request.language}")
 
     # Asynchronous processing using Celery
+    print(f"[LOG] Enviando tarefa para Celery...")
     task = ocr_task.apply_async(
         args=[file.binary, request.strategy, file.filename, file.hash, request.ocr_cache, request.prompt,
               request.model, request.language, request.storage_profile, request.storage_filename])
+    print(f"[LOG] Tarefa enviada para Celery | task_id={task.id}")
     return {"task_id": task.id}
 
 
@@ -301,7 +325,9 @@ async def clear_ocr_cache():
     """
     Endpoint to clear the OCR result cache in Redis.
     """
+    print("[LOG] Limpando cache de OCR em Redis...")
     redis_client.flushdb()
+    print("[LOG] Cache de OCR limpo.")
     return {"status": "OCR cache cleared"}
 
 
@@ -340,13 +366,14 @@ async def pull_llama(request: OllamaPullRequest):
     """
     Endpoint to pull the latest Llama model from the Ollama API.
     """
-    print("Pulling " + request.model)
+    print(f"[LOG] Iniciando /llm/pull | model={request.model}")
     try:
         response = ollama.pull(request.model)
     except ollama.ResponseError as e:
-        print('Error:', e.error)
+        print(f"[LOG] Erro ao puxar modelo Llama: {e.error}")
         raise HTTPException(status_code=500, detail="Failed to pull Llama model from Ollama API")
 
+    print(f"[LOG] Modelo Llama puxado com sucesso | status={response.get('status', 'Model pulled successfully')}")
     return {"status": response.get("status", "Model pulled successfully")}
 
 
@@ -355,8 +382,9 @@ async def generate_llama(request: OllamaGenerateRequest):
     """
     Endpoint to generate text using Llama 3.1 model (and other models) via the Ollama API.
     """
-    print(request)
+    print(f"[LOG] Iniciando /llm/generate | model={request.model}, prompt={request.prompt[:100] if request.prompt else None}")
     if not request.prompt:
+        print("[LOG] Nenhum prompt fornecido para geração de texto.")
         raise HTTPException(status_code=400, detail="No prompt provided")
 
     try:

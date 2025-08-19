@@ -120,7 +120,7 @@ setup-docker:
 .PHONY: run-docker
 run-docker:
 	@echo -e "\033[1;32m   ✔ Starting Docker container with CPU support...\033[0m";
-	@docker-compose -f docker-compose.yml up --build
+	@docker-compose -f docker-compose.yaml up --build
 
 .PHONY: run-docker-gpu
 run-docker-gpu:

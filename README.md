@@ -9,7 +9,7 @@ The API is built with FastAPI and uses Celery for asynchronous task processing. 
 ## Features:
 
 - **No Cloud/external dependencies** all you need: PyTorch based OCR (EasyOCR) + Ollama are shipped and configured via `docker-compose` no data is sent outside your dev/server environment,
-- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [llama3.2-vision](https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/), [easyOCR](https://github.com/JaidedAI/EasyOCR), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
+- **PDF/Office to Markdown** conversion with very high accuracy using different OCR strategies including [easyOCR](https://github.com/JaidedAI/EasyOCR), remote URL strategies including [marker-pdf](https://github.com/VikParuchuri/marker)
 - **PDF/Office to JSON** conversion using Ollama supported models (eg. LLama 3.1)
 - **LLM Improving OCR results** LLama is pretty good with fixing spelling and text issues in the OCR text
 - **Removing PII** This tool can be used for removing Personally Identifiable Information out of document - see `examples`
@@ -174,12 +174,6 @@ Easy OCR is available on Apache based license. It's general purpose OCR with sup
 
 Enabled by default. Please do use the `strategy=easyocr` CLI and URL parameters to use it.
 
-### `llama_vision`
-
-LLama 3.2 Vision Strategy is licensed on [Meta Community License Agreement](https://ollama.com/library/llama3.2-vision/blobs/0b4284c1f870). Works great for many languages, although due to the number of parameters (90b) this model is probably **the slowest** one.
-
-Enabled by default. Please do use the `strategy=llama_vision` CLI and URL parameters to use it. It's by the way the default strategy
-
 ### `remote`
 
 Some OCR's - like [Marker, state of the art PDF OCR](https://github.com/VikParuchuri/marker) - works really great for more than 50 languages, including great accuracy for Polish and other languages - let's say that are "diffult" to read for standard OCR.
@@ -326,13 +320,12 @@ cd client
 pip install -e .
 ```
 
-### Pull the LLama3.1 and LLama3.2-vision models
+### Pull the LLama3.1 model
 
 You might want to test out [different models supported by LLama](https://ollama.com/library)
 
 ```bash
 python client/cli.py llm_pull --model llama3.1
-python client/cli.py llm_pull --model llama3.2-vision
 ```
 
 These models are required for most features supported by `text-extract-api`.
@@ -359,7 +352,6 @@ For example, you must run:
 
 ```bash
 python client/cli.py llm_pull --model llama3.1
-python client/cli.py llm_pull --model llama3.2-vision
 ```
 
 and only after to run this specific prompt query:

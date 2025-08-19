@@ -42,9 +42,6 @@ else
 
   echo "Pulling LLama3.1 model"
   ollama pull llama3.1
-
-  echo "Pulling LLama3.2-vision model"
-  ollama pull llama3.2-vision
 fi
 
 echo "Starting Redis"
